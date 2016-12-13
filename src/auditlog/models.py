@@ -33,6 +33,9 @@ class LogEntryManager(models.Manager):
         changes = kwargs.get('changes', None)
         pk = self._get_pk_value(instance)
 
+        module = instance._meta.app_label
+        if module:
+            kwargs.setdefault('module', module)
         if changes is not None:
             kwargs.setdefault('content_type', ContentType.objects.get_for_model(instance))
             kwargs.setdefault('object_pk', pk)
@@ -173,8 +176,11 @@ class LogEntry(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True, verbose_name=_("timestamp"))
     additional_data = JSONField(blank=True, null=True, verbose_name=_("additional data"))
 
+    module = models.TextField(null=True)
     objects = LogEntryManager()
 
+    customer_id = models.IntegerField(null=True)
+    actor_name = models.TextField(blank=True, null=True)
     class Meta:
         get_latest_by = 'timestamp'
         ordering = ['-timestamp']

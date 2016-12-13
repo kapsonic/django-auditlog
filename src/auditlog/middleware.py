@@ -8,6 +8,8 @@ from django.db.models.signals import pre_save
 from django.utils.functional import curry
 from django.apps import apps
 from auditlog.models import LogEntry
+from rest_framework.authtoken.models import Token
+from re import sub
 
 # Use MiddlewareMixin when present (Django >= 1.10)
 try:
@@ -31,6 +33,16 @@ class AuditlogMiddleware(MiddlewareMixin):
         attached to it.
         """
         # Initialize thread local storage
+        header_token = request.META.get('HTTP_AUTHORIZATION', None)
+        if header_token is not None:
+            try:
+                token = sub('Token ', '', request.META.get('HTTP_AUTHORIZATION', None))
+                token_obj = Token.objects.get(key = token)
+                request.user = token_obj.user
+                request.user.name = token_obj.user.username
+            except Exception, e:
+                print(e)
+                raise e
         threadlocal.auditlog = {
             'signal_duid': (self.__class__, time.time()),
             'remote_addr': request.META.get('REMOTE_ADDR'),
@@ -76,5 +88,9 @@ class AuditlogMiddleware(MiddlewareMixin):
             auth_user_model = apps.get_model('auth', 'user')
         if sender == LogEntry and isinstance(user, auth_user_model) and instance.actor is None:
             instance.actor = user
+            print(user.customer_id)
+            print(user.username)
+            instance.actor_name = user.username
+            instance.customer_id = user.customer_id
         if hasattr(threadlocal, 'auditlog'):
             instance.remote_addr = threadlocal.auditlog['remote_addr']
