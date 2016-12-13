@@ -15,4 +15,4 @@ class LogEntryAdmin(admin.ModelAdmin, LogEntryAdminMixin):
     ]
 
 
-admin.site.register(LogEntry, LogEntryAdmin)
+# admin.site.register(LogEntry, LogEntryAdmin)

@@ -93,10 +93,10 @@ class AuditlogModelRegistry(object):
     def get_model_fields(self, model):
         print('model for fields ', model)
         try:
-        return {
-            'include_fields': self._registry[model]['include_fields'],
-            'exclude_fields': self._registry[model]['exclude_fields'],
-        }
+            return {
+                'include_fields': self._registry[model]['include_fields'],
+                'exclude_fields': self._registry[model]['exclude_fields'],
+            }
         except:
             pass
 
